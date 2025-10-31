@@ -1,11 +1,18 @@
-#ifndef COLOR
-#define COLOR
+//
+// Created by loko on 31/10/2025.
+//
+
+#ifndef AIGAME_2025_ABDELBAKI_LANG_COLOR_H
+#define AIGAME_2025_ABDELBAKI_LANG_COLOR_H
 
 
-enum Color{
+enum Color {
     red,
     blue,
+    transparentRED,
+    transparentBLUE,
     transparent
 };
 
-#endif
+
+#endif //AIGAME_2025_ABDELBAKI_LANG_COLOR_H

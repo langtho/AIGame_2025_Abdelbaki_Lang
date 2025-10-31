@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 14)
 include_directories(include)
 
 add_executable(AIGame_2025_Abdelbaki_Lang
-        include/Color.h
-        include/Seed.h
-        main.cpp)
+        main.cpp
+        include/Field.h
+        include/Board.h
+        src/Board.cpp
+        src/Field.cpp
+        include/Game.h
+        src/Game.cpp
+        include/Color.h)
