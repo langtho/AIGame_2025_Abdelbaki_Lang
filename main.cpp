@@ -20,10 +20,28 @@ int main(int argc, char** argv)
       }
       int field;
       int color;
+      bool isfield=false,isSeed=false;
       cout<<"Choose your Field: "<<endl;
-      cin>>field;
+      while (isfield==false) {
+         cin>>field;
+         if (field>0 && field<=16) {
+            isfield=true;
+         }else {
+            cout<<"Not a valid field try again"<<endl;
+         }
+      }
+
+      field--;
       cout<<"Choose your Color: "<<endl<<"0:red"<<endl<<"1:blue"<<endl<<"2:transparent red"<<endl<<"3:transparent blue"<<endl;
-      cin>>color;
+      while (isSeed==false) {
+         cin>>color;
+         if (field>0 && field<=16) {
+            isSeed=true;
+         }else {
+            cout<<"Not a valid Seed ID try again"<<endl;
+         }
+      }
+
       int points=game.playMove(field,(Color)color);
 
       if (points>0) {
@@ -32,7 +50,6 @@ int main(int argc, char** argv)
       gameOver=game.gameOver();
       player1turn=!player1turn;
 
-      system("cls");
    }
 
    cout<<"Game is over P1: "<<game.getScoreP1()<<"Score P2: "<<game.getScoreP2()<<endl;
