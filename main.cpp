@@ -11,7 +11,7 @@ int main(int argc, char** argv)
    bool player1turn=true;
    Game game;
    while (!gameOver) {
-      cout<<"Score P1: "<<game.getScoreP1()<<"Score P2: "<<game.getScoreP2()<<endl;
+      cout<<"Score P1: "<<game.getScoreP1()<<" | Score P2: "<<game.getScoreP2()<<endl;
       game.getBoard()->showBoard();
       if (player1turn) {
          cout<<"Player1 turn"<<endl;
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
       cout<<"Choose your Color: "<<endl<<"0:red"<<endl<<"1:blue"<<endl<<"2:transparent red"<<endl<<"3:transparent blue"<<endl;
       while (isSeed==false) {
          cin>>color;
-         if (field>0 && field<=16) {
+         if (field>=0 && field<=16) {
             isSeed=true;
          }else {
             cout<<"Not a valid Seed ID try again"<<endl;

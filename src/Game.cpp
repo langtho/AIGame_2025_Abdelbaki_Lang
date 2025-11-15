@@ -1,8 +1,10 @@
 //
 // Created by loko on 31/10/2025.
+// updated by Kacem le 04/11/2025 (updated the gameOver method logic)
 //
 
 #include "Game.h"
+#include <vector>
 
 int Game::playMove(int field, Color color) {
     bool distributing_in_all_holes = false;
@@ -20,8 +22,9 @@ int Game::playMove(int field, Color color) {
 
     field++;
 
-    while (seeds!=0 ||transparent_seeds!=0) {
+    std::vector<int> sown;
 
+    while (seeds!=0 ||transparent_seeds!=0) {
         if (transparent_seeds!=0) {
             board->fields[field].put_seed(transparent);
             transparent_seeds--;
@@ -30,10 +33,7 @@ int Game::playMove(int field, Color color) {
             seeds--;
         }
 
-        if (seeds==0) {
-            score=capture(field,distributing_in_all_holes);
-            break;
-        }
+        sown.push_back(field);
 
         if (distributing_in_all_holes) {
             if (field!=15) {
@@ -51,9 +51,22 @@ int Game::playMove(int field, Color color) {
             }
         }
     }
+    for (int f : sown) {
+        if (board->fields[f].total_seeds == 2 || board->fields[f].total_seeds == 3) {
+            score += capture(f, distributing_in_all_holes);
+        }
+    }
     return score;
 }
 
+
+/*
+Capturing:
+  * occurs only when a player brings the count of an hole to exactly two or three seeds (of any color). This always captures the seeds in the corresponding hole, and possibly more: If the previous-to-last seed also brought an hole to two or three seeeds, these are captured as well, and so on until a hole is reached which does not contain two or three seeds. The captured seeds are set aside. Starving the opponent IS ALLOWED
+  * it is allowed to take the seeds from its own hole and seeds are captured (independently of their colors).
+  * Taking all the seeds of the opponent is allowed (all the seeds are captured by the last player).
+  * If there's less than 10 seeds on the board. In this case, the remaining seeds are not take into account.
+*/
 int Game::capture(int field, bool everyField) {
     bool capture=true;
     int score=0;
@@ -82,9 +95,18 @@ int Game::capture(int field, bool everyField) {
     }
 }
 
+/*
+The game is over when: 
+    * one player has captured 49 or more seeds
+    * each player has taken 40 seeds (draw)
+    * there is only strictly less than 10 seeds that remain
 
+==> The winner is the player who has more seeds than his opponent
+*/
 bool Game::gameOver() {
-    if (score_p1 > 49 || score_p2>49 || score_p1+score_p2>70) {
+	int remainingSeeds = board->getTotalSeeds();
+
+    if (score_p1 > 49 || score_p2>49 || remainingSeeds<=10 || (score_p1 == 40 && score_p2 == 40)) {
         return true;
     }
     return false;
