@@ -1,5 +1,5 @@
 //
-// Created by loko on 31/10/2025.
+// Created by loko on 31/10/2025
 //
 #include "Board.h"
 
@@ -36,4 +36,12 @@ void Board::showBoard() {
         x=8;
         cout<<endl<<endl;
     }
+}
+
+int Board::getTotalSeeds() {
+    int total=0;
+    for (int i=0;i<16;i++) {
+        total+=fields[i].total_seeds;
+    }
+    return total;
 }

@@ -22,6 +22,8 @@ class Board {
     }
 
     void showBoard();
+
+    int getTotalSeeds();
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_BOARD_H
