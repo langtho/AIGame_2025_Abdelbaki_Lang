@@ -1,0 +1,13 @@
+//
+// Created by loko on 22/11/2025.
+//
+
+#ifndef AIGAME_2025_ABDELBAKI_LANG_MINMAX_H
+#define AIGAME_2025_ABDELBAKI_LANG_MINMAX_H
+
+
+class MinMax {
+};
+
+
+#endif //AIGAME_2025_ABDELBAKI_LANG_MINMAX_H

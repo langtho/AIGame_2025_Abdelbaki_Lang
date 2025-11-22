@@ -13,4 +13,9 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         src/Field.cpp
         include/Game.h
         src/Game.cpp
-        include/Color.h)
+        include/Color.h
+        include/State.h
+        include/EvaluationLogic/Evaluate.h
+        include/EvaluationLogic/MinMax.h
+        include/GameRules.h
+        src/GameRules.cpp)

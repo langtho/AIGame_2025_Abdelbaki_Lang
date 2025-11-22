@@ -6,19 +6,19 @@
 #define AIGAME_2025_ABDELBAKI_LANG_BOARD_H
 #include <iostream>
 #include "Field.h"
-
+#include <vector>
 using namespace std;
 
 class Board {
     public:
-        Field* fields;
+        vector<Field> fields;
 
     Board() {
-        fields= new Field[16];
+        fields= vector<Field>(16);
     }
 
     ~Board() {
-        delete fields;
+
     }
 
     void showBoard();
