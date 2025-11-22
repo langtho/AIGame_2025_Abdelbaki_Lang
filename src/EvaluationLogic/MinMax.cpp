@@ -35,7 +35,7 @@ int MinMax::_minmax(const State &state, int depth, bool player_playing,int alpha
             //state.afficherState(move.first,move.second,depth); //DEBUG
             State next_State = GameRules::playMove(state,move.first,move.second);
             int eval = _minmax(next_State,depth-1,true,alpha,beta);
-            min_eval=max(min_eval,eval);
+            min_eval=min(min_eval,eval);
 
             beta=min(beta,min_eval);
             if (beta<=alpha) {
@@ -64,6 +64,7 @@ pair<int, Color> MinMax::find_best_move(const State &state) {
         State next_State = GameRules::playMove(state,move.first,move.second);
         int eval = _minmax(next_State,max_depth-1,false,alpha,beta);
         if (eval>max_eval) {
+            cout<<eval<<" "<<max_eval<<" "<<move.first<<" "<<move.second<<endl;
             max_eval=eval;
             best_move=move;
         }
