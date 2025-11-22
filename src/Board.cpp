@@ -37,3 +37,11 @@ void Board::showBoard() const{
         cout<<endl<<endl;
     }
 }
+
+int Board::getTotalSeeds() {
+    int total=0;
+    for (int i=0;i<16;i++) {
+        total+=fields[i].total_seeds;
+    }
+    return total;
+}
