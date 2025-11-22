@@ -3,21 +3,21 @@
 //
 #include "Field.h"
 
-void Field::show_field() {
+void Field::show_field() const{
     cout<<"R:"<<red_seeds<<endl;
     cout<<"B:"<<blue_seeds<<endl;
     cout<<"T:"<<transparent_seeds<<endl;
 }
 
-void Field::show_red() {
+void Field::show_red()const {
     cout<<"|   RED:"<<red_seeds;
 }
 
-void Field::show_blue() {
+void Field::show_blue() const{
     cout<<"|  BLUE:"<<blue_seeds;
 }
 
-void Field::show_transparent() {
+void Field::show_transparent() const{
     cout<<"|  TRSP:"<<transparent_seeds;
 }
 
@@ -57,8 +57,8 @@ int Field::take_seeds(Color color, int& transparentseeds) {
     return seeds;
 }
 
-void Field::put_seed(Color color) {
-    switch (color) {
+void Field::put_seed(Color c) {
+    switch (c) {
         case red:
             red_seeds++;
             total_seeds++;
@@ -69,10 +69,11 @@ void Field::put_seed(Color color) {
             total_seeds++;
             break;
 
-        case transparent:
+        default:
             transparent_seeds++;
             total_seeds++;
             break;
+
     }
 }
 
@@ -84,3 +85,15 @@ int Field::take_all_seeds() {
     total_seeds=0;
     return seeds;
 }
+
+const bool Field::verify_Seed(Color color) {
+    switch (color) {
+        case red:
+            return (red_seeds>0);
+        case blue:
+            return (blue_seeds>0);
+        default:
+            return (transparent_seeds);
+    }
+}
+

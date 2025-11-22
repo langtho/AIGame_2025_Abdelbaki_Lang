@@ -4,7 +4,12 @@
 
 #include "Game.h"
 #include "GameRules.h"
+#include "EvaluationLogic/MinMax.h"
 void Game::run() {
+
+
+        MinMax ai(7);
+        pair<int,Color> best_move;
 
         GameRules game_rules;
         bool gameOver=false;
@@ -15,12 +20,15 @@ void Game::run() {
             game.currentState.board.showBoard();
             if (player1turn) {
                 cout<<"Player1 turn"<<endl;
+                best_move=ai.find_best_move(game.currentState);
+                cout<<"The AI chooses"<<best_move.first+1<<"||"<<best_move.second<<endl;
             }else {
                 cout<<"Player2 turn"<<endl;
             }
             int field;
             int color;
             bool isfield=false,isSeed=false;
+
             cout<<"Choose your Field: "<<endl;
             while (isfield==false) {
                 cin>>field;

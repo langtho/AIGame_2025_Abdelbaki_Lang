@@ -20,8 +20,8 @@ class Board {
     ~Board() {
 
     }
-
-    void showBoard();
+    Board(const Board& other) =default;
+    void showBoard() const;
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_BOARD_H

@@ -2,6 +2,7 @@
 // Created by loko on 22/11/2025.
 //
 #include "GameRules.h"
+#include "Color.h"
 
 State GameRules::playMove(const State& state,int field, Color color) {
     bool distributing_in_all_holes = false;
@@ -10,22 +11,27 @@ State GameRules::playMove(const State& state,int field, Color color) {
     int score=0;
     State newState=State(state);
     if (color==red || color==transparentRED)distributing_in_all_holes=true;
-
     seeds=newState.board.fields[field].take_seeds(color,transparent_seeds);
 
-    if (seeds==0) {
+    if (seeds==0 && transparent_seeds==0) {
         cerr<<"Your play isn't valid: No seed in the demanded color"<<endl;
     }
+    if (field==15) {
+        field=0;
+    }else {
+        field++;
+    }
 
-    field++;
 
     while (seeds!=0 ||transparent_seeds!=0) {
 
         if (transparent_seeds!=0) {
-            newState.board.fields[field].put_seed(transparent);
+            newState.board.fields[field].put_seed(transparentRED);
             transparent_seeds--;
         }else {
-            (distributing_in_all_holes)?newState.board.fields[field].put_seed(red):newState.board.fields[field].put_seed(blue);
+            (distributing_in_all_holes)
+                ? newState.board.fields[field].put_seed(red)
+                : newState.board.fields[field].put_seed(blue);
             seeds--;
         }
 
@@ -83,4 +89,25 @@ int GameRules::capture(State& state,int field) {
             return score;
         }
     }
+    return 0;
+}
+
+vector<pair<int,Color>> GameRules::getPossibleMoves(const State& state) {
+    vector<pair<int,Color>> possible_coups;
+    int start;
+    (state.player_playing)?start=1:start=0;
+
+    for (int i=start;i<16;i+=2) {
+        if (state.board.fields[i].red_seeds>0) {
+            possible_coups.push_back(  {i,red});
+        }
+        if (state.board.fields[i].blue_seeds>0) {
+            possible_coups.push_back(  {i,blue});
+        }
+        if (state.board.fields[i].transparent_seeds>0) {
+            possible_coups.push_back(  {i,transparentRED});
+            possible_coups.push_back(  {i,transparentBLUE});
+        }
+    }
+    return possible_coups;
 }

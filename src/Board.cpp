@@ -3,7 +3,7 @@
 //
 #include "Board.h"
 
-void Board::showBoard() {
+void Board::showBoard() const{
     int x=0;
     for (int r=0; r<2; r++) {
             for (int j=0;j<8;j++) {
