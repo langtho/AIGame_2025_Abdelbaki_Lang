@@ -11,7 +11,6 @@ enum Color {
     blue,
     transparentRED,
     transparentBLUE,
-    transparent
 };
 
 

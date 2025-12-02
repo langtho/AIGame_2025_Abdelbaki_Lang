@@ -14,15 +14,18 @@ class Field {
         int total_seeds;
 
     Field():red_seeds(2),blue_seeds(2),transparent_seeds(2),total_seeds(6){}
+    Field(const Field& other)=default;
 
-    void show_field();
-    void show_red();
-    void show_blue();
-    void show_transparent();
+    void show_field() const;
+    void show_red()const;
+    void show_blue()const;
+    void show_transparent()const;
 
     int take_seeds(Color color,int& transparentSeeds);
     int take_all_seeds();
     void put_seed(Color color);
+
+    const bool verify_Seed(Color color);
 };
 
 

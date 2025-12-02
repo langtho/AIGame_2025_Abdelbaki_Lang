@@ -4,28 +4,17 @@
 
 #ifndef AIGAME_2025_ABDELBAKI_LANG_GAME_H
 #define AIGAME_2025_ABDELBAKI_LANG_GAME_H
-#include "Board.h"
+#include "State.h"
 #include "Color.h"
 
 class Game {
     private:
-    Board* board;
-    int score_p1,score_p2;
+    State currentState;
 
     public:
-    Game():board(new Board),score_p1(0),score_p2(0){}
-    ~Game(){delete board;}
+    Game():currentState(State(Board(),0,0,true)){}
 
-    Board* getBoard();
-    int getScoreP1();
-    int getScoreP2();
-
-    void setScoreP1(int score);
-    void setScoreP2(int score);
-
-    bool gameOver();
-    int playMove(int field,Color color);
-    int capture(int field, bool everyField);
+    void run();
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_GAME_H
