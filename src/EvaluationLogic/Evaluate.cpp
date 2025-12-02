@@ -8,11 +8,14 @@
 int Evaluate::evaluate_state(const State &state) {
     if (GameRules::gameOver(state)) {
         constexpr int WIN_SCORE = 1000;
-        if (state.score_p1>state.score_p2) {
-            return WIN_SCORE;
-        }else {
-            return -WIN_SCORE;
+        if (state.score_p1 > state.score_p2) {
+            return WIN_SCORE + (state.score_p1 - state.score_p2);
+        } else if (state.score_p2 > state.score_p1) {
+            return -WIN_SCORE - (state.score_p2 - state.score_p1);
+        } else {
+            return 0;
         }
     }
-    return state.score_p1-state.score_p2;
+
+    return state.score_p1 - state.score_p2;
 }
