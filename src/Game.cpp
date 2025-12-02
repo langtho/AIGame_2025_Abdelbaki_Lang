@@ -8,7 +8,7 @@
 void Game::run() {
 
 
-        MinMax ai(6);
+        MinMax ai(7);
         pair<int,Color> best_move;
 
         GameRules game_rules;
