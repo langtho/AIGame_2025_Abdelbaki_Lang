@@ -10,6 +10,7 @@ State GameRules::playMove(const State& state,int field, Color color) {
     int transparent_seeds=0;
     int score=0;
     State newState=State(state);
+    newState.moves_played++;
     if (color==red || color==transparentRED)distributing_in_all_holes=true;
     seeds=newState.board.fields[field].take_seeds(color,transparent_seeds);
 
@@ -84,6 +85,11 @@ State GameRules::playMove(const State& state,int field, Color color) {
 }
 
 bool GameRules::gameOver(const State& state) {
+
+    if (state.moves_played>=400) {
+        return true;
+    }
+
     if (state.score_p1 >= 49 || state.score_p2 >= 49) {
         return true;
     }

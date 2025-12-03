@@ -14,6 +14,7 @@ class Game {
     public:
     Game():currentState(State(Board(),0,0,true)){}
 
+    void runAIBattle();
     void run();
 };
 

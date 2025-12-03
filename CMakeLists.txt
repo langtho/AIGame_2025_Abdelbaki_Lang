@@ -22,7 +22,9 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         include/GameRules.h
         src/GameRules.cpp
         src/EvaluationLogic/MinMax.cpp
-        src/EvaluationLogic/Evaluate.cpp)
+        src/EvaluationLogic/Evaluate.cpp
+        src/MCTS.cpp
+        include/MCTS.h)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -g -O1)
