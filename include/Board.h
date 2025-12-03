@@ -22,6 +22,7 @@ class Board {
     }
     Board(const Board& other) =default;
     void showBoard() const;
+    int getTotalSeeds() const;
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_BOARD_H

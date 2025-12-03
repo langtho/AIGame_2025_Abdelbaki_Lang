@@ -9,7 +9,8 @@
 class MinMax {
 private:
     int max_depth;
-    int _minmax(const State& state, int depth, bool player_playing,int alpha,int beta); //true=maximising player
+    // maximizing_player: true if it's the maximizing player's turn in the tree
+    int _minmax(const State& state, int depth, bool maximizing_player, bool original_player_is_p1, int alpha, int beta);
 public:
     MinMax(int d):max_depth(d){};
     pair<int,Color> find_best_move(const State& state);

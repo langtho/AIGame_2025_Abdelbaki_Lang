@@ -35,11 +35,6 @@ State GameRules::playMove(const State& state,int field, Color color) {
             seeds--;
         }
 
-        if (seeds==0) {
-
-            break;
-        }
-
         if (distributing_in_all_holes) {
             if (field!=15) {
                 field++;
@@ -67,7 +62,8 @@ State GameRules::playMove(const State& state,int field, Color color) {
 }
 
 bool GameRules::gameOver(const State& state) {
-    if (state.score_p1 > 49 || state.score_p2>49 || state.score_p1+state.score_p2>70) {
+    int total_remaining = state.board.getTotalSeeds();
+    if (state.score_p1 >= 49 || state.score_p2 >= 49 || (state.score_p1 >= 40 && state.score_p2 >= 40) || total_remaining < 10) {
         return true;
     }
     return false;
@@ -95,7 +91,7 @@ int GameRules::capture(State& state,int field) {
 vector<pair<int,Color>> GameRules::getPossibleMoves(const State& state) {
     vector<pair<int,Color>> possible_coups;
     int start;
-    (state.player_playing)?start=1:start=0;
+    (state.player_playing)?start=0:start=1;
 
     for (int i=start;i<16;i+=2) {
         if (state.board.fields[i].red_seeds>0) {
