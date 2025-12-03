@@ -57,7 +57,24 @@ State GameRules::playMove(const State& state,int field, Color color) {
     }else {
         newState.score_p2+=score;
     }
-    newState.player_playing=!newState.player_playing;
+
+    newState.player_playing = !newState.player_playing;
+    //Starvation rule
+    vector<pair<int,Color>> opponentMoves = getPossibleMoves(newState);
+
+    if (opponentMoves.empty()) {
+        int remaining = 0;
+        for(int i=0; i<16; i++) {
+            remaining += newState.board.fields[i].take_all_seeds();
+        }
+
+        if (!newState.player_playing) {
+            newState.score_p1 += remaining;
+        } else {
+            newState.score_p2 += remaining;
+        }
+    }
+
     return newState;
 }
 
@@ -66,6 +83,11 @@ bool GameRules::gameOver(const State& state) {
     if (state.score_p1 >= 49 || state.score_p2 >= 49 || (state.score_p1 >= 40 && state.score_p2 >= 40) || total_remaining < 10) {
         return true;
     }
+    int seedsOnBoard = 96 - (state.score_p1 + state.score_p2);
+    if (seedsOnBoard < 10) {
+        return true;
+    }
+
     return false;
 }
 
