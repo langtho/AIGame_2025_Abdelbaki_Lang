@@ -38,3 +38,11 @@ void Board::showBoard() const{
     }
 }
 
+int Board::getTotalSeeds() const {
+    int total = 0;
+    for (const auto& field : fields) {
+        total += field.total_seeds;
+    }
+    return total;
+}
+

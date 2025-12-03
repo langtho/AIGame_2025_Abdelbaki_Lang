@@ -7,7 +7,8 @@
 #include "State.h"
 class Evaluate {
 public:
-    static int evaluate_state(const State& state);
+    // maximizing_player_is_p1: true if player 1, false if player 2
+    static int evaluate_state(const State& state, bool maximizing_player_is_p1 = true);
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_EVALUATE_H

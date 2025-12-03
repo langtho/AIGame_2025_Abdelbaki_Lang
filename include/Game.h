@@ -7,14 +7,22 @@
 #include "State.h"
 #include "Color.h"
 
+enum GameMode {
+    PVP, // Player vs Player
+    PVE, // Player vs AI
+    EVE  // AI vs AI
+};
+
 class Game {
     private:
     State currentState;
+    GameMode mode;
 
     public:
-    Game():currentState(State(Board(),0,0,true)){}
+    Game():currentState(State(Board(),0,0,true)), mode(PVP){}
 
     void run();
+    void setMode(GameMode m) { mode = m; }
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_GAME_H

@@ -35,11 +35,6 @@ State GameRules::playMove(const State& state,int field, Color color) {
             seeds--;
         }
 
-        if (seeds==0) {
-
-            break;
-        }
-
         if (distributing_in_all_holes) {
             if (field!=15) {
                 field++;
@@ -84,7 +79,8 @@ State GameRules::playMove(const State& state,int field, Color color) {
 }
 
 bool GameRules::gameOver(const State& state) {
-    if (state.score_p1 >= 49 || state.score_p2 >= 49) {
+    int total_remaining = state.board.getTotalSeeds();
+    if (state.score_p1 >= 49 || state.score_p2 >= 49 || (state.score_p1 >= 40 && state.score_p2 >= 40) || total_remaining < 10) {
         return true;
     }
     int seedsOnBoard = 96 - (state.score_p1 + state.score_p2);
