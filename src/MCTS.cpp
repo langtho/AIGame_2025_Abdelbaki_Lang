@@ -75,7 +75,9 @@ pair<int, Color> MCTS::find_best_move(const State &state) {
         int result = simulate(node->state);
         backpropagate(node, result);
     }
-
+    if (root->children.size()==0) {
+        cerr<<"Ca retourne -1";
+    }
     pair<int, Color> best_move = {-1, red};
     int max_visits = -1;
 
@@ -85,6 +87,8 @@ pair<int, Color> MCTS::find_best_move(const State &state) {
             best_move = child->move_from_parent;
         }
     }
+
+
 
     return best_move;
 }

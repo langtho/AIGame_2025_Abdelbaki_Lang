@@ -65,7 +65,6 @@ void Game::run() {
 
 // src/Game.cpp
 
-// ... (deine existierenden Includes: Game.h, GameRules.h, MCTS.h, MinMax.h, iostream) ...
 
 void Game::runAIBattle() {
     GameRules game_rules;

@@ -12,6 +12,9 @@ State GameRules::playMove(const State& state,int field, Color color) {
     State newState=State(state);
     newState.moves_played++;
     if (color==red || color==transparentRED)distributing_in_all_holes=true;
+    if (field>=16||field<0) {
+        cerr<<"ERROR";
+    }
     seeds=newState.board.fields[field].take_seeds(color,transparent_seeds);
 
     if (seeds==0 && transparent_seeds==0) {
