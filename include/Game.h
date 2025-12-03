@@ -21,6 +21,7 @@ class Game {
     public:
     Game():currentState(State(Board(),0,0,true)), mode(PVP){}
 
+    void runAIBattle();
     void run();
     void setMode(GameMode m) { mode = m; }
 };

@@ -4,6 +4,8 @@
 
 #include "Game.h"
 #include "GameRules.h"
+#include "EvaluationLogic/MinMax.h"
+#include "MCTS.h"
 #include "Bot.h"
 #include <iostream>
 
@@ -105,3 +107,72 @@ void Game::run() {
     delete bot2;
 }
 
+// src/Game.cpp
+
+
+void Game::runAIBattle() {
+    GameRules game_rules;
+    bool gameOver = false;
+    bool player1turn = true;
+
+    Game game;
+
+    int mcts_iterations = 3000;
+    int minmax_depth = 6;
+
+    MCTS mcts_ai(mcts_iterations);
+    mcts_ai.initialize(game.currentState);
+
+    MinMax minmax_ai(minmax_depth);
+
+    pair<int, Color> move;
+
+    cout << "=== AI BATTLE MODE STARTED ===" << endl;
+    cout << "P1: MCTS (" << mcts_iterations << " iters) vs P2: MinMax (Depth " << minmax_depth << ")" << endl;
+    cout << "Format: [MoveNr] Player : Field | Color -> Score P1:P2" << endl;
+    cout << "--------------------------------------------------------" << endl;
+
+    while (!gameOver) {
+
+        if (player1turn) {
+
+            move = mcts_ai.find_best_move(game.currentState);
+        } else {
+
+            move = minmax_ai.find_best_move(game.currentState);
+        }
+
+
+        cout << "[" << game.currentState.moves_played + 1 << "] "
+             << (player1turn ? "MCTS  " : "MinMax") << " : "
+             << move.first + 1 << " | " << move.second << " ";
+
+
+        game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
+
+
+        mcts_ai.advance_tree(move, game.currentState);
+
+
+        cout << "-> " << game.currentState.score_p1 << ":" << game.currentState.score_p2 << endl;
+
+
+        gameOver = game_rules.gameOver(game.currentState);
+        player1turn = !player1turn;
+    }
+
+
+    cout << "--------------------------------------------------------" << endl;
+    cout << "BATTLE FINISHED after " << game.currentState.moves_played << " moves." << endl;
+    cout << "Final Score: MCTS " << game.currentState.score_p1 << " - " << game.currentState.score_p2 << " MinMax" << endl;
+
+    if (game.currentState.score_p1 > game.currentState.score_p2)
+        cout << "WINNER: MCTS" << endl;
+    else if (game.currentState.score_p2 > game.currentState.score_p1)
+        cout << "WINNER: MinMax" << endl;
+    else
+        cout << "RESULT: DRAW" << endl;
+
+    cout << "\nFinal Board State:" << endl;
+    game.currentState.board.showBoard();
+}

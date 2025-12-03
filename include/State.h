@@ -13,9 +13,10 @@ class State {
     Board board;
     int score_p1, score_p2;
     bool player_playing;
+    int moves_played;
 
 
-    State(const Board& b, int p1,int p2, bool pp):board(b),score_p1(p1),score_p2(p2),player_playing(pp){};
+    State(const Board& b, int p1,int p2, bool pp):board(b),score_p1(p1),score_p2(p2),player_playing(pp),moves_played(0){};
     State(const State& other)=default;
 
     void afficherState(int field,Color c,int dep) const{

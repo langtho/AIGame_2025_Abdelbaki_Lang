@@ -23,6 +23,8 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         src/GameRules.cpp
         src/EvaluationLogic/MinMax.cpp
         src/EvaluationLogic/Evaluate.cpp
+        src/MCTS.cpp
+        include/MCTS.h
         include/Bot.h
         src/Bot.cpp)
 
