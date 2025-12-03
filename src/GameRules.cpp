@@ -39,11 +39,6 @@ State GameRules::playMove(const State& state,int field, Color color) {
             seeds--;
         }
 
-        if (seeds==0) {
-
-            break;
-        }
-
         if (distributing_in_all_holes) {
             if (field!=15) {
                 field++;
