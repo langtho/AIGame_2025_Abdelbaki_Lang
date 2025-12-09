@@ -117,7 +117,7 @@ void Game::runAIBattle() {
 
     Game game;
 
-    int mcts_iterations = 3000;
+    int mcts_iterations = 6000;
     int minmax_depth = 6;
 
     MCTS mcts_ai(mcts_iterations);

@@ -72,7 +72,7 @@ pair<int, Color> MinMax::find_best_move(const State &state) {
         // minimizing
         int eval = _minmax(next_State,max_depth-1,false,we_are_p1,alpha,beta);
         if (eval>best_eval) {
-            cout<<eval<<" "<<best_eval<<" "<<move.first<<" "<<move.second<<endl;
+            //cout<<eval<<" "<<best_eval<<" "<<move.first<<" "<<move.second<<endl;
             best_eval=eval;
             best_move=move;
         }
