@@ -41,7 +41,7 @@ void Game::run() {
     */
 
 	if (mode == PVE || mode == EVE) {
-        bot2 = new Bot(4); 
+        bot2 = new Bot(4);
     }
     if (mode == EVE) {
         bot1 = new Bot(4);
@@ -232,7 +232,7 @@ void Game::runStrategyBattle() {
     int old_wins = 0;
     int new_wins = 0;
     int draws = 0;
-    
+
     double total_time_new = 0;
     int moves_new = 0;
 
@@ -272,7 +272,7 @@ void Game::runStrategyBattle() {
     }
 
     // New Bot (IDDFS PVS + Killer + History)
-    BotIDDFS newBot(1850);
+    BotIDDFS newBot(1950);
 
     GameRules game_rules;
 
@@ -320,11 +320,11 @@ void Game::runStrategyBattle() {
                       << " (" << std::fixed << std::setprecision(1) << duration_ms << " ms) ";
 
             game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
-            
+
             if (choice == 3) {
                 mctsBot->advance_tree(move, game.currentState);
             }
-            
+
             std::cout << "-> " << game.currentState.score_p1 << ":" << game.currentState.score_p2 << std::endl;
 
             gameOver = game_rules.gameOver(game.currentState);

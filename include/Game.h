@@ -22,7 +22,7 @@ class Game {
     Game():currentState(State(Board(),0,0,true)), mode(PVP){}
 
     void runAIBattle();
-    void runStrategyBattle(); 
+    void runStrategyBattle();
     void runCompetition();
     void run();
     void setMode(GameMode m) { mode = m; }
