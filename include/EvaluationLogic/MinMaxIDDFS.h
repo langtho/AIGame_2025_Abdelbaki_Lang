@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <chrono>
 #include <vector>
+#include <atomic>
 
 // Entry for the Transposition Table
 struct TTEntry {
@@ -20,6 +21,7 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> start_time;
     int time_limit_ms;
     bool time_out;
+    std::atomic<bool>* stop_flag = nullptr;
 
     // Transposition Table (In-Memory Cache)
     std::unordered_map<uint64_t, TTEntry> tt;
@@ -42,6 +44,8 @@ private:
 public:
     MinMaxIDDFS(int time_ms = 1950);
     std::pair<int, Color> find_best_move(const State& state);
+    void setTimeLimit(int ms) { time_limit_ms = ms; }
+    void setStopFlag(std::atomic<bool>* flag) { stop_flag = flag; }
 };
 
 #endif //AIGAME_2025_ABDELBAKI_LANG_MINMAXIDDFS_H

@@ -285,7 +285,7 @@ int MCTS::simulate(State state) {
         return 0;
     }
 
-    int score = eval.evaluate_stateNEW(state, true);
+    int score = eval.evaluate_state(state, true);
     if (score > 10) return 1;
     if (score < -10) return -1;
     return 0;
@@ -324,7 +324,7 @@ double MCTS::alphaBeta(const State &state, int depth, double alpha, double beta,
 
     if (depth == 0 || GameRules::gameOver(state)) {
         Evaluate eval;
-        double val = (double)eval.evaluate_stateNEW(state, maximizing_player_is_p1);
+        double val = (double)eval.evaluate_state(state, maximizing_player_is_p1);
         if (use_cache) solution_cache[state_key] = val;
         return val;
     }
@@ -332,7 +332,7 @@ double MCTS::alphaBeta(const State &state, int depth, double alpha, double beta,
     vector<pair<int, Color>> moves = GameRules::getPossibleMoves(state);
     if (moves.empty()) {
          Evaluate eval;
-         double val = (double)eval.evaluate_stateNEW(state, maximizing_player_is_p1);
+         double val = (double)eval.evaluate_state(state, maximizing_player_is_p1);
          if (use_cache) solution_cache[state_key] = val;
          return val;
     }

@@ -15,6 +15,9 @@ private:
 
     std::unordered_map<uint64_t, TTEntry> tt;
 
+    // Heuristics Tables
+    std::pair<int, Color> killer_moves[100][2]; // [depth][slot] - Store 2 killer moves per depth
+
     static bool z_initialized;
     static uint64_t z_red[16][100];
     static uint64_t z_blue[16][100];

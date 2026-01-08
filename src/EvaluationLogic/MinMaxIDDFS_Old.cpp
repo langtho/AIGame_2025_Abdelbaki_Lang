@@ -71,17 +71,22 @@ int MinMaxIDDFS_Old::_minmax(const State &state, int depth, int alpha, int beta,
     auto moves = GameRules::getPossibleMoves(state);
     if (moves.empty()) return Evaluate::evaluate_state(state, original_player_is_p1);
 
-    // Basic Move Ordering (TT only)
+    // --- MOVE ORDERING (Lazy) ---
     std::pair<int, Color> best_move_tt = {-1, red};
     if (tt.count(hash)) best_move_tt = tt[hash].best_move;
 
-    if (best_move_tt.first != -1) {
-        for (size_t i = 0; i < moves.size(); ++i) {
-            if (moves[i].first == best_move_tt.first && moves[i].second == best_move_tt.second) {
-                std::swap(moves[0], moves[i]); break;
-            }
-        }
-    }
+    // Helper lambda for priority (Fast lookup, no playMove!)
+    auto getPriority = [&](const std::pair<int, Color>& m) {
+        if (m.first == best_move_tt.first && m.second == best_move_tt.second) return 10000000;
+        if (m == killer_moves[depth][0]) return 90000;
+        if (m == killer_moves[depth][1]) return 80000;
+        return 0;
+    };
+
+    // Sort moves: Best priority first
+    std::sort(moves.begin(), moves.end(), [&](const std::pair<int, Color>& a, const std::pair<int, Color>& b) {
+        return getPriority(a) > getPriority(b);
+    });
 
     int value = maximizing_player ? std::numeric_limits<int>::min() : std::numeric_limits<int>::max();
     std::pair<int, Color> best_move_this_node = moves[0];
@@ -99,7 +104,17 @@ int MinMaxIDDFS_Old::_minmax(const State &state, int depth, int alpha, int beta,
             if (eval < value) { value = eval; best_move_this_node = move; }
             beta = std::min(beta, value);
         }
-        if (beta <= alpha) break;
+        if (beta <= alpha) {
+            // Beta Cutoff (Pruning)
+            if (!time_out) {
+                // Update Killer Moves
+                if (move != killer_moves[depth][0]) {
+                    killer_moves[depth][1] = killer_moves[depth][0];
+                    killer_moves[depth][0] = move;
+                }
+            }
+            break;
+        }
     }
 
     if (!time_out) {
@@ -117,6 +132,10 @@ std::pair<int, Color> MinMaxIDDFS_Old::find_best_move(const State &state) {
     start_time = std::chrono::steady_clock::now();
     time_out = false;
     tt.clear();
+    
+    // Reset Heuristics for new search
+    for(auto& d : killer_moves) { d[0] = {-1, red}; d[1] = {-1, red}; }
+
     std::pair<int, Color> best_move = {-1, red};
     auto moves = GameRules::getPossibleMoves(state);
     if (!moves.empty()) best_move = moves[0];

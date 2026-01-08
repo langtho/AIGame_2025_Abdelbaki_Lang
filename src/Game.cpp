@@ -14,6 +14,8 @@
 #include <iomanip>
 #include <functional>
 #include <memory>
+#include <thread>
+#include <atomic>
 
 void Game::run() {
     // Choose mode
@@ -357,20 +359,42 @@ void Game::runStrategyBattle() {
 
 void Game::runCompetition() {
     // Use our Champion Bot
-    BotIDDFS bot(1950); 
+    BotIDDFS bot(1950);
     
     // Ensure output is sent immediately (no buffering)
     std::cout.setf(std::ios::unitbuf);
 
     std::string token;
-    while (std::cin >> token) {
+    std::atomic<bool> stop_pondering(false);
+
+    while (true) {
+        // --- START PONDERING ---
+        stop_pondering = false;
+        bot.setStopFlag(&stop_pondering);
+        bot.setTimeLimit(1000000); // Infinite time for pondering
+        
+        std::thread ponderThread([&]() {
+            bot.getMove(currentState); // Ponder on current state
+        });
+
+        if (!(std::cin >> token)) {
+            stop_pondering = true;
+            ponderThread.join();
+            break;
+        }
+
+        // --- STOP PONDERING ---
+        stop_pondering = true;
+        ponderThread.join();
+        
+        bot.setStopFlag(nullptr);
+        bot.setTimeLimit(2850);
+
         if (token == "START") {
-            // We are Player 1. We start.
-            // Board is already initialized in 'currentState'.
+
             
             auto move = bot.getMove(currentState);
             
-            // Output format: Field Color
             std::string colorStr;
             switch(move.second) {
                 case red: colorStr = "R"; break;
@@ -380,16 +404,12 @@ void Game::runCompetition() {
             }
             std::cout << (move.first + 1) << " " << colorStr << std::endl;
             
-            // Update our internal state
             currentState = GameRules::playMove(currentState, move.first, move.second);
             
         } else if (token.find("RESULT") != std::string::npos) {
-            // Game Over signal from Arbiter
             break;
         } else {
-            // It's a move from the opponent.
-            // Format: "Field" "Color"
-            // We already read "Field" into 'token'.
+
             int field = std::stoi(token);
             std::string colorStr;
             std::cin >> colorStr;

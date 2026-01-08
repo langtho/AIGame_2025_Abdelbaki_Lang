@@ -4,6 +4,7 @@
 #include <limits>
 #include <algorithm>
 #include <random>
+#include <cmath>
 #include <iostream>
 
 // Static members initialization
@@ -17,7 +18,7 @@ MinMaxIDDFS::MinMaxIDDFS(int time_ms) : time_limit_ms(time_ms), time_out(false) 
     if (!z_initialized) {
         initZobrist();
     }
-    tt.reserve(200000);
+    tt.reserve(1000000); // Increase capacity for Persistent TT
 }
 
 void MinMaxIDDFS::initZobrist() {
@@ -76,12 +77,12 @@ int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, boo
     }
 
     if (depth == 0 || GameRules::gameOver(state)) {
-        return Evaluate::evaluate_stateNEW(state, original_player_is_p1);
+        return Evaluate::evaluate_state(state, original_player_is_p1);
     }
 
     auto moves = GameRules::getPossibleMoves(state);
     if (moves.empty()) {
-        return Evaluate::evaluate_stateNEW(state, original_player_is_p1);
+        return Evaluate::evaluate_state(state, original_player_is_p1);
     }
 
     // --- MOVE ORDERING (Lazy) ---
@@ -146,7 +147,12 @@ int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, boo
         if (value <= original_alpha) entry.flag = 2;
         else if (value >= beta) entry.flag = 1;
         else entry.flag = 0;
-        tt[hash] = entry;
+        
+        // Replacement Strategy: Only overwrite if the new entry is from a deeper (or equal) search
+        auto it = tt.find(hash);
+        if (it == tt.end() || depth >= it->second.depth) {
+            tt[hash] = entry;
+        }
     }
 
     return value;
@@ -155,12 +161,14 @@ int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, boo
 std::pair<int, Color> MinMaxIDDFS::find_best_move(const State &state) {
     start_time = std::chrono::steady_clock::now();
     time_out = false;
-    tt.clear(); 
+     tt.clear();
     
     // Reset Heuristics for new search
     for(auto& d : killer_moves) { d[0] = {-1, red}; d[1] = {-1, red}; }
     
     std::pair<int, Color> best_move = {-1, red};
+    int best_val = -999999; // Store value for Aspiration Windows
+
     auto moves = GameRules::getPossibleMoves(state);
     if (!moves.empty()) best_move = moves[0];
 
@@ -172,7 +180,8 @@ std::pair<int, Color> MinMaxIDDFS::find_best_move(const State &state) {
         uint64_t hash = computeHash(state);
         if (tt.count(hash)) {
             best_move = tt[hash].best_move;
-            if (val > 9000 || val < -9000) break;
+            best_val = val;
+            if (val > 90000 || val < -90000) break; // Updated threshold for new score scaling
         }
     }
 
