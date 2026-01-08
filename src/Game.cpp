@@ -7,7 +7,13 @@
 #include "EvaluationLogic/MinMax.h"
 #include "MCTS.h"
 #include "Bot.h"
+#include "BotIDDFS.h"
+#include "BotIDDFS_Old.h"
 #include <iostream>
+#include <chrono>
+#include <iomanip>
+#include <functional>
+#include <memory>
 
 void Game::run() {
     // Choose mode
@@ -111,68 +117,305 @@ void Game::run() {
 
 
 void Game::runAIBattle() {
-    GameRules game_rules;
-    bool gameOver = false;
-    bool player1turn = true;
+    // Configuration
+    int num_games=100;
 
-    Game game;
-
-    int mcts_iterations = 6000;
+    int mcts_iterations = 5000; // 5000 si Debug, 25000-50000 si Release
     int minmax_depth = 6;
 
+    // Stats globales
+    int mcts_wins = 0;
+    int minmax_wins = 0;
+    int draws = 0;
+
+    // Initialisation des IAs (une seule fois pour garder le cache/mémoire !)
     MCTS mcts_ai(mcts_iterations);
-    mcts_ai.initialize(game.currentState);
+    mcts_ai.loadKnowledge("final_games.txt"); // Chargement du cerveau binaire
 
     MinMax minmax_ai(minmax_depth);
+    GameRules game_rules;
 
-    pair<int, Color> move;
-
-    cout << "=== AI BATTLE MODE STARTED ===" << endl;
-    cout << "P1: MCTS (" << mcts_iterations << " iters) vs P2: MinMax (Depth " << minmax_depth << ")" << endl;
-    cout << "Format: [MoveNr] Player : Field | Color -> Score P1:P2" << endl;
+    cout << "\n=== AI BATTLE TOURNAMENT STARTED ===" << endl;
+    cout << "MCTS (" << mcts_iterations << " iters) vs MinMax (Depth " << minmax_depth << ")" << endl;
+    cout << "Total Games: " << num_games << endl;
     cout << "--------------------------------------------------------" << endl;
 
-    while (!gameOver) {
+    for (int g = 1; g <= num_games; g++) {
+        Game game;
+        bool gameOver = false;
 
-        if (player1turn) {
+        bool mcts_is_p1 = (g % 2 != 0);
 
-            move = mcts_ai.find_best_move(game.currentState);
-        } else {
+        mcts_ai.initialize(game.currentState);
 
-            move = minmax_ai.find_best_move(game.currentState);
+        cout << "\nGame " << g << " / " << num_games << " Started!" << endl;
+        if (mcts_is_p1) cout << ">> P1: MCTS (Starts) vs P2: MinMax" << endl;
+        else            cout << ">> P1: MinMax (Starts) vs P2: MCTS" << endl;
+
+        while (!gameOver) {
+            pair<int, Color> move;
+
+
+            bool is_p1_turn = game.currentState.player_playing;
+
+            bool is_mcts_turn = (mcts_is_p1 && is_p1_turn) || (!mcts_is_p1 && !is_p1_turn);
+
+            string player_name = is_mcts_turn ? "MCTS  " : "MinMax";
+
+            // --- CHRONO START ---
+            auto start_time = std::chrono::high_resolution_clock::now();
+
+            if (is_mcts_turn) {
+                move = mcts_ai.find_best_move(game.currentState);
+            } else {
+                move = minmax_ai.find_best_move(game.currentState);
+            }
+
+            // --- CHRONO END ---
+            auto end_time = std::chrono::high_resolution_clock::now();
+            double duration_ms = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+
+            // Affichage du coup et du temps
+            cout << "[" << std::setw(3) << game.currentState.moves_played + 1 << "] "
+                 << player_name << " : "
+                 << "Field " << std::setw(2) << move.first + 1 << " | Color " << move.second
+                 << " (" << std::fixed << std::setprecision(1) << duration_ms << " ms) ";
+
+            // Appliquer le coup
+            game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
+
+            // Mettre à jour l'arbre MCTS (Crucial pour qu'il suive le jeu)
+            mcts_ai.advance_tree(move, game.currentState);
+
+            cout << "-> " << game.currentState.score_p1 << ":" << game.currentState.score_p2 << endl;
+
+            gameOver = game_rules.gameOver(game.currentState);
         }
 
+        // Fin de la partie
+        int score_mcts = mcts_is_p1 ? game.currentState.score_p1 : game.currentState.score_p2;
+        int score_minmax = mcts_is_p1 ? game.currentState.score_p2 : game.currentState.score_p1;
 
-        cout << "[" << game.currentState.moves_played + 1 << "] "
-             << (player1turn ? "MCTS  " : "MinMax") << " : "
-             << move.first + 1 << " | " << move.second << " ";
+        cout << "--------------------------------------------------------" << endl;
+        cout << "GAME " << g << " FINISHED." << endl;
+        cout << "Score: MCTS " << score_mcts << " - " << score_minmax << " MinMax" << endl;
 
+        if (score_mcts > score_minmax) {
+            cout << "WINNER: MCTS" << endl;
+            mcts_wins++;
+        } else if (score_minmax > score_mcts) {
+            cout << "WINNER: MinMax" << endl;
+            minmax_wins++;
+        } else {
+            cout << "RESULT: DRAW" << endl;
+            draws++;
+        }
+        cout << "--------------------------------------------------------" << endl;
 
-        game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
-
-
-        mcts_ai.advance_tree(move, game.currentState);
-
-
-        cout << "-> " << game.currentState.score_p1 << ":" << game.currentState.score_p2 << endl;
-
-
-        gameOver = game_rules.gameOver(game.currentState);
-        player1turn = !player1turn;
+        // Sauvegarder l'apprentissage après chaque partie (Sécurité)
+        mcts_ai.saveKnowledge("final_games.txt");
     }
 
+    // RÉSULTATS FINAUX DU TOURNOI
+    cout << "\n=============================================" << endl;
+    cout << "TOURNAMENT FINISHED" << endl;
+    cout << "MCTS Wins   : " << mcts_wins << endl;
+    cout << "MinMax Wins : " << minmax_wins << endl;
+    cout << "Draws       : " << draws << endl;
+    cout << "=============================================" << endl;
+}
 
-    cout << "--------------------------------------------------------" << endl;
-    cout << "BATTLE FINISHED after " << game.currentState.moves_played << " moves." << endl;
-    cout << "Final Score: MCTS " << game.currentState.score_p1 << " - " << game.currentState.score_p2 << " MinMax" << endl;
+void Game::runStrategyBattle() {
+    int num_games = 10;
+    int old_wins = 0;
+    int new_wins = 0;
+    int draws = 0;
+    
+    double total_time_new = 0;
+    int moves_new = 0;
 
-    if (game.currentState.score_p1 > game.currentState.score_p2)
-        cout << "WINNER: MCTS" << endl;
-    else if (game.currentState.score_p2 > game.currentState.score_p1)
-        cout << "WINNER: MinMax" << endl;
-    else
-        cout << "RESULT: DRAW" << endl;
+    // Select Opponent
+    int choice;
+    std::cout << "Select Opponent for Optimized IDDFS:\n";
+    std::cout << "1. Old MinMax (Fixed Depth 6)\n";
+    std::cout << "2. Basic IDDFS (Previous Version)\n";
+    std::cout << "3. MCTS (Monte Carlo Tree Search)\n";
+    std::cin >> choice;
 
-    cout << "\nFinal Board State:" << endl;
-    game.currentState.board.showBoard();
+    std::function<std::pair<int, Color>(const State&)> getOpponentMove;
+    std::unique_ptr<Bot> oldMinMaxBot;
+    std::unique_ptr<BotIDDFS_Old> basicIDDFSBot;
+    std::unique_ptr<MCTS> mctsBot;
+    std::string opponentName;
+    std::string opponentShortName;
+
+    if (choice == 1) {
+        oldMinMaxBot = std::make_unique<Bot>(6);
+        getOpponentMove = [&](const State& s) { return oldMinMaxBot->getMove(s); };
+        opponentName = "Old MinMax (Depth 6)";
+        opponentShortName = "OldBot";
+    } else if (choice == 2) {
+        basicIDDFSBot = std::make_unique<BotIDDFS_Old>(1850);
+        getOpponentMove = [&](const State& s) { return basicIDDFSBot->getMove(s); };
+        opponentName = "Basic IDDFS";
+        opponentShortName = "Basic ";
+    } else {
+        int iters;
+        std::cout << "Enter MCTS Iterations (e.g. 5000): ";
+        std::cin >> iters;
+        mctsBot = std::make_unique<MCTS>(iters);
+        getOpponentMove = [&](const State& s) { return mctsBot->find_best_move(s); };
+        opponentName = "MCTS (" + std::to_string(iters) + " iters)";
+        opponentShortName = "MCTS  ";
+    }
+
+    // New Bot (IDDFS PVS + Killer + History)
+    BotIDDFS newBot(1850);
+
+    GameRules game_rules;
+
+    std::cout << "\n=== STRATEGY BATTLE: " << opponentName << " vs IDDFS Optimized ===" << std::endl;
+
+    for (int g = 1; g <= num_games; g++) {
+        Game game;
+        bool gameOver = false;
+        bool newBot_is_p1 = (g % 2 != 0); // Alternate starting player
+
+        if (choice == 3) {
+            mctsBot->initialize(game.currentState);
+        }
+
+        std::cout << "\nGame " << g << " / " << num_games << " Started!" << std::endl;
+        if (newBot_is_p1) std::cout << ">> P1: Optimized vs P2: " << opponentName << std::endl;
+        else              std::cout << ">> P1: " << opponentName << " vs P2: Optimized" << std::endl;
+
+        while (!gameOver) {
+            std::pair<int, Color> move;
+            bool is_p1_turn = game.currentState.player_playing;
+            bool is_newBot_turn = (newBot_is_p1 && is_p1_turn) || (!newBot_is_p1 && !is_p1_turn);
+
+            std::string player_name = is_newBot_turn ? "Optim " : opponentShortName;
+
+            auto start_time = std::chrono::high_resolution_clock::now();
+
+            if (is_newBot_turn) {
+                move = newBot.getMove(game.currentState);
+            } else {
+                move = getOpponentMove(game.currentState);
+            }
+
+            auto end_time = std::chrono::high_resolution_clock::now();
+            double duration_ms = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+
+            if (is_newBot_turn) {
+                total_time_new += duration_ms;
+                moves_new++;
+            }
+
+            std::cout << "[" << std::setw(3) << game.currentState.moves_played + 1 << "] "
+                      << player_name << " : "
+                      << "Field " << std::setw(2) << move.first + 1 << " | Color " << move.second
+                      << " (" << std::fixed << std::setprecision(1) << duration_ms << " ms) ";
+
+            game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
+            
+            if (choice == 3) {
+                mctsBot->advance_tree(move, game.currentState);
+            }
+            
+            std::cout << "-> " << game.currentState.score_p1 << ":" << game.currentState.score_p2 << std::endl;
+
+            gameOver = game_rules.gameOver(game.currentState);
+        }
+
+        int score_new = newBot_is_p1 ? game.currentState.score_p1 : game.currentState.score_p2;
+        int score_old = newBot_is_p1 ? game.currentState.score_p2 : game.currentState.score_p1;
+
+        std::cout << "--------------------------------------------------------" << std::endl;
+        std::cout << "Score: Optim " << score_new << " - " << score_old << " " << opponentShortName << std::endl;
+
+        if (score_new > score_old) {
+            std::cout << "WINNER: Optimized" << std::endl;
+            new_wins++;
+        } else if (score_old > score_new) {
+            std::cout << "WINNER: " << opponentShortName << std::endl;
+            old_wins++;
+        } else {
+            std::cout << "RESULT: DRAW" << std::endl;
+            draws++;
+        }
+    }
+
+    std::cout << "\n=== BATTLE FINISHED ===" << std::endl;
+    std::cout << "Optim Wins : " << new_wins << std::endl;
+    std::cout << opponentShortName << " Wins : " << old_wins << std::endl;
+    std::cout << "Draws      : " << draws << std::endl;
+    if (moves_new > 0) {
+        std::cout << "Avg Time IDDFS: " << (total_time_new / moves_new) << " ms" << std::endl;
+    }
+}
+
+void Game::runCompetition() {
+    // Use our Champion Bot
+    BotIDDFS bot(1950); 
+    
+    // Ensure output is sent immediately (no buffering)
+    std::cout.setf(std::ios::unitbuf);
+
+    std::string token;
+    while (std::cin >> token) {
+        if (token == "START") {
+            // We are Player 1. We start.
+            // Board is already initialized in 'currentState'.
+            
+            auto move = bot.getMove(currentState);
+            
+            // Output format: Field Color
+            std::string colorStr;
+            switch(move.second) {
+                case red: colorStr = "R"; break;
+                case blue: colorStr = "B"; break;
+                case transparentRED: colorStr = "TR"; break;
+                case transparentBLUE: colorStr = "TB"; break;
+            }
+            std::cout << (move.first + 1) << " " << colorStr << std::endl;
+            
+            // Update our internal state
+            currentState = GameRules::playMove(currentState, move.first, move.second);
+            
+        } else if (token.find("RESULT") != std::string::npos) {
+            // Game Over signal from Arbiter
+            break;
+        } else {
+            // It's a move from the opponent.
+            // Format: "Field" "Color"
+            // We already read "Field" into 'token'.
+            int field = std::stoi(token);
+            std::string colorStr;
+            std::cin >> colorStr;
+            
+            Color colorVal;
+            if (colorStr == "R") colorVal = red;
+            else if (colorStr == "B") colorVal = blue;
+            else if (colorStr == "TR") colorVal = transparentRED;
+            else if (colorStr == "TB") colorVal = transparentBLUE;
+            
+            // Apply opponent's move
+            currentState = GameRules::playMove(currentState, field - 1, colorVal);
+            
+            if (GameRules::gameOver(currentState)) break;
+            
+            // Calculate and play our move
+            auto move = bot.getMove(currentState);
+            std::string myColorStr;
+            switch(move.second) {
+                case red: myColorStr = "R"; break;
+                case blue: myColorStr = "B"; break;
+                case transparentRED: myColorStr = "TR"; break;
+                case transparentBLUE: myColorStr = "TB"; break;
+            }
+            std::cout << (move.first + 1) << " " << myColorStr << std::endl;
+            currentState = GameRules::playMove(currentState, move.first, move.second);
+        }
+    }
 }

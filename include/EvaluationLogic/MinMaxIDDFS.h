@@ -1,0 +1,47 @@
+#ifndef AIGAME_2025_ABDELBAKI_LANG_MINMAXIDDFS_H
+#define AIGAME_2025_ABDELBAKI_LANG_MINMAXIDDFS_H
+
+#include "../State.h"
+#include <unordered_map>
+#include <chrono>
+#include <vector>
+
+// Entry for the Transposition Table
+struct TTEntry {
+    int depth;
+    int value;
+    int flag; // 0: Exact, 1: LowerBound, 2: UpperBound
+    std::pair<int, Color> best_move;
+};
+
+class MinMaxIDDFS {
+private:
+    // Time Management
+    std::chrono::time_point<std::chrono::steady_clock> start_time;
+    int time_limit_ms;
+    bool time_out;
+
+    // Transposition Table (In-Memory Cache)
+    std::unordered_map<uint64_t, TTEntry> tt;
+
+    // Heuristics Tables
+    std::pair<int, Color> killer_moves[100][2]; // [depth][slot] - Store 2 killer moves per depth
+
+    // Zobrist Hashing Keys
+    static bool z_initialized;
+    static uint64_t z_red[16][100];
+    static uint64_t z_blue[16][100];
+    static uint64_t z_trans[16][100];
+    static uint64_t z_turn;
+
+    void initZobrist();
+    uint64_t computeHash(const State& state);
+
+    int _minmax(const State& state, int depth, int alpha, int beta, bool maximizing_player, bool original_player_is_p1);
+
+public:
+    MinMaxIDDFS(int time_ms = 1950);
+    std::pair<int, Color> find_best_move(const State& state);
+};
+
+#endif //AIGAME_2025_ABDELBAKI_LANG_MINMAXIDDFS_H

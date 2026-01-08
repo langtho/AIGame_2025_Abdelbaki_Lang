@@ -28,9 +28,9 @@ Taking all the seeds of the opponent is allowed. In case of starving all the see
 The game stops when there is strictly less than 10 seeds on the board. In this case, the remaining seeds are not take into account.
 
 -- Winning
-The game is over when one player has captured 49 or more seeds, or each player has taken 40 seeds (draw), or there is only strictly less than 10 seeds that remain. The winner is the player who has more seeds than his opponent.
+The game is over when one player has captured 49 or more seeds, or there is only strictly less than 10 seeds that remain. The winner is the player who has more seeds than his opponent.
 
-
+The game has a maximum of 400 moves. If a player plays the 400th move then the game is stopped and the winner is the player who has more seeds than his opponent.
 
 examples:
  

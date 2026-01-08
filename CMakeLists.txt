@@ -26,10 +26,14 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         src/MCTS.cpp
         include/MCTS.h
         include/Bot.h
-        src/Bot.cpp)
+        src/Bot.cpp
+        src/BotIDDFS.cpp
+        src/EvaluationLogic/MinMaxIDDFS.cpp
+        src/EvaluationLogic/MinMaxIDDFS_Old.cpp
+
+)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -g -O1)
     target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
 endif()
-
