@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build and Run C++ App",
+			"type": "shell",
+			"command": "cmake --build build && build\\AIGame_2025_Abdelbaki_Lang.exe",
+			"args": [],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

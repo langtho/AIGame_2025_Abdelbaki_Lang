@@ -8,6 +8,10 @@
 #include "MCTS.h"
 #include "Bot.h"
 #include <iostream>
+#include <chrono>
+#include <string>
+
+using namespace std;
 
 void Game::run() {
     // Choose mode
@@ -23,14 +27,6 @@ void Game::run() {
     Bot* bot2 = nullptr;
 
     int limit = 0;
-
-    /*
-    * depth = 2 yielded okay results in testing (Game over! P1: 42 P2: 48)
-    * depth = 3 yielded bad results in testing (infinite loop)
-    * depth = 4 yielded good results in testing (Game over! P1: 43 P2: 47)
-    * depth = 5 yielded bad results in testing (infinite loop)
-    * depth = 6 yielded good results in testing (Game over! P1: 48 P2: 39)
-    */
 
 	if (mode == PVE || mode == EVE) {
         bot2 = new Bot(4); 
@@ -53,13 +49,18 @@ void Game::run() {
         if ((currentState.player_playing && mode == EVE) || (!currentState.player_playing && (mode == PVE || mode == EVE))) {
             // AI turn
             Bot* currentBot = currentState.player_playing ? bot1 : bot2;
+            
+            auto start_time = std::chrono::high_resolution_clock::now();
             move = currentBot->getMove(currentState);
+            auto end_time = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+            
             if (GameRules::getPossibleMoves(currentState).empty()) {
                 std::cout << "No possible moves, game over." << std::endl;
                 gameOver = true;
                 break;
             }
-            std::cout << "AI chooses " << move.first + 1 << " " << move.second << std::endl;
+            std::cout << "AI chooses " << move.first + 1 << " " << move.second << " (" << duration.count() << "ms)" << std::endl;
         } else {
             // Human turn
             int field, color;
@@ -117,8 +118,8 @@ void Game::runAIBattle() {
 
     Game game;
 
-    int mcts_iterations = 3000;
-    int minmax_depth = 6;
+    int mcts_iterations = 1000;
+    int minmax_depth = 10;
 
     MCTS mcts_ai(mcts_iterations);
     mcts_ai.initialize(game.currentState);
@@ -134,19 +135,26 @@ void Game::runAIBattle() {
 
     while (!gameOver) {
 
+        auto start_time = chrono::high_resolution_clock::now();
+        
         if (player1turn) {
-
             move = mcts_ai.find_best_move(game.currentState);
         } else {
+            move = minmax_ai.find_best_move(game.currentState, std::chrono::milliseconds(3000));
+        }
+        
+        auto end_time = chrono::high_resolution_clock::now();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end_time - start_time);
 
-            move = minmax_ai.find_best_move(game.currentState);
+        string colorStr;
+        switch (move.second) {
+            case red: colorStr = "R"; break;
+            case blue: colorStr = "B"; break;
+            case transparentRED: colorStr = "TR"; break;
+            case transparentBLUE: colorStr = "TB"; break;
         }
 
-
-        cout << "[" << game.currentState.moves_played + 1 << "] "
-             << (player1turn ? "MCTS  " : "MinMax") << " : "
-             << move.first + 1 << " | " << move.second << " ";
-
+        cout << "[" << game.currentState.moves_played + 1 << "] " << (player1turn ? "MinMax" : "MCTS  ") << " : " << move.first + 1 << colorStr << " (" << duration.count() << "ms) ";
 
         game.currentState = game_rules.playMove(game.currentState, move.first, move.second);
 
@@ -175,4 +183,90 @@ void Game::runAIBattle() {
 
     cout << "\nFinal Board State:" << endl;
     game.currentState.board.showBoard();
+}
+
+string moveToString(const pair<int, Color>& move) {
+    string colorStr;
+    switch (move.second) {
+        case red: colorStr = "R"; break;
+        case blue: colorStr = "B"; break;
+        case transparentRED: colorStr = "TR"; break;
+        case transparentBLUE: colorStr = "TB"; break;
+    }
+    return to_string(move.first + 1) + colorStr;
+}
+
+pair<int, Color> parseMove(const string& moveStr) {
+    int field = 0;
+    Color color = red;
+    
+    size_t i = 0;
+    while (i < moveStr.length() && isdigit(moveStr[i])) {
+        i++;
+    }
+    
+    field = stoi(moveStr.substr(0, i)) - 1;
+    
+    string colorStr = moveStr.substr(i);
+    if (colorStr == "R") color = red;
+    else if (colorStr == "B") color = blue;
+    else if (colorStr == "TR") color = transparentRED;
+    else if (colorStr == "TB") color = transparentBLUE;
+    
+    return {field, color};
+}
+
+void Game::runAsExternalPlayer() {
+    int minmax_depth = 8;
+    MinMax ai(minmax_depth);
+    
+    State state(Board(), 0, 0, true);
+    
+    string input;
+    while (getline(cin, input)) {
+        if (input == "END") {
+            break;
+        }
+        
+        pair<int, Color> ourMove;
+        
+        if (input == "START") {
+            state = State(Board(), 0, 0, true);
+            
+            ourMove = ai.find_best_move(state, chrono::milliseconds(2500));
+            state = GameRules::playMove(state, ourMove.first, ourMove.second);
+            
+            cout << moveToString(ourMove) << endl;
+            cout.flush();
+        }
+        else if (input.find("RESULT") != string::npos) {
+            break;
+        }
+        else {
+            if (state.moves_played == 0) {
+                state = State(Board(), 0, 0, true);
+            }
+            
+            pair<int, Color> oppMove = parseMove(input);
+            state = GameRules::playMove(state, oppMove.first, oppMove.second);
+            
+            if (GameRules::gameOver(state)) {
+                cout << "RESULT " << moveToString(oppMove) << " " << state.score_p1 << " " << state.score_p2 << endl;
+                cout.flush();
+                break;
+            }
+            
+            ourMove = ai.find_best_move(state, chrono::milliseconds(2500));
+            state = GameRules::playMove(state, ourMove.first, ourMove.second);
+            
+            if (GameRules::gameOver(state)) {
+                cout << "RESULT " << moveToString(ourMove) << " " << state.score_p1 << " " << state.score_p2 << endl;
+                cout.flush();
+                break;
+            }
+            
+            cout << moveToString(ourMove) << endl;
+            cout.flush();
+        }
+    }
 }

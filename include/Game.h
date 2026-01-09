@@ -22,6 +22,7 @@ class Game {
     Game():currentState(State(Board(),0,0,true)), mode(PVP){}
 
     void runAIBattle();
+    void runAsExternalPlayer();
     void run();
     void setMode(GameMode m) { mode = m; }
 };
