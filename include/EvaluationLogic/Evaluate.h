@@ -7,7 +7,8 @@
 #include "State.h"
 class Evaluate {
 public:
-    // maximizing_player_is_p1: true if player 1, false if player 2
+    // Static evaluation function.
+    // Returns a score from the perspective of the maximizing player (P1 if true, P2 if false).
     static int evaluate_state(const State& state, bool maximizing_player_is_p1 = true);
 };
 

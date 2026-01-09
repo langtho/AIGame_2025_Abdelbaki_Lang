@@ -7,7 +7,7 @@
 #include <vector>
 #include <atomic>
 
-// Entry for the Transposition Table
+// Entry for the Transposition Table (Cache)
 struct TTEntry {
     int depth;
     int value;
@@ -17,19 +17,19 @@ struct TTEntry {
 
 class MinMaxIDDFS {
 private:
-    // Time Management
+    // --- Time Management ---
     std::chrono::time_point<std::chrono::steady_clock> start_time;
     int time_limit_ms;
     bool time_out;
-    std::atomic<bool>* stop_flag = nullptr;
+    std::atomic<bool>* stop_flag = nullptr; // Pointer to external flag to stop search immediately (for Pondering)
 
-    // Transposition Table (In-Memory Cache)
+    // --- Transposition Table ---
     std::unordered_map<uint64_t, TTEntry> tt;
 
-    // Heuristics Tables
+    // --- Heuristics ---
     std::pair<int, Color> killer_moves[100][2]; // [depth][slot] - Store 2 killer moves per depth
 
-    // Zobrist Hashing Keys
+    // --- Zobrist Hashing (for unique board IDs) ---
     static bool z_initialized;
     static uint64_t z_red[16][100];
     static uint64_t z_blue[16][100];

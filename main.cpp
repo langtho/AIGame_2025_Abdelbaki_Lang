@@ -8,6 +8,5 @@ using namespace std;
 int main(int argc, char** argv)
 {
    Game game;
-   game.runStrategyBattle();
-   //game.runCompetition();
+   game.runCompetition();
 }

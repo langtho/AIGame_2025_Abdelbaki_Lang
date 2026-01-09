@@ -5,11 +5,12 @@
 #include "State.h"
 #include <atomic>
 
+// Wrapper class for the MinMaxIDDFS engine.
 class BotIDDFS {
 private:
     MinMaxIDDFS ai;
 public:
-    // time_ms: Time limit per move in milliseconds
+    // Constructor: Sets the time limit per move (in milliseconds).
     BotIDDFS(int time_ms = 1950) : ai(time_ms) {};
     std::pair<int, Color> getMove(const State& state);
     void setTimeLimit(int ms) { ai.setTimeLimit(ms); }
