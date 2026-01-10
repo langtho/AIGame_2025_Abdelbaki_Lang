@@ -18,10 +18,14 @@ MinMaxIDDFS::MinMaxIDDFS(int time_ms) : time_limit_ms(time_ms), time_out(false) 
     if (!z_initialized) {
         initZobrist();
     }
-    tt.reserve(1000000); // Increase capacity for Persistent TT
+    // Reserve memory for the Transposition Table to avoid frequent reallocations.
+    // 1 million entries is a good balance for memory vs history.
+    tt.reserve(1000000);
 }
 
 void MinMaxIDDFS::initZobrist() {
+    // Initialize Zobrist keys with random numbers.
+    // These are used to compute a unique hash for each board state.
     std::mt19937_64 rng(12345);
     std::uniform_int_distribution<uint64_t> dist;
 
@@ -37,6 +41,7 @@ void MinMaxIDDFS::initZobrist() {
 }
 
 uint64_t MinMaxIDDFS::computeHash(const State& state) {
+    // Compute the Zobrist hash for the current board state.
     uint64_t h = 0;
     if (state.player_playing) h ^= z_turn;
 
@@ -55,8 +60,9 @@ uint64_t MinMaxIDDFS::computeHash(const State& state) {
 int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, bool maximizing_player, bool original_player_is_p1) {
 if (time_out) return 0;
     
-// Check time more frequently (every 1024 nodes instead of 2048) to avoid overshooting
-if ((++node_count & 1023) == 0) {
+    static int node_count = 0;
+    // Check time every 1024 nodes.
+    if ((++node_count & 1023) == 0) {
         auto now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() >= time_limit_ms) {
             time_out = true;
@@ -64,6 +70,7 @@ if ((++node_count & 1023) == 0) {
         }
     }
 
+    // Transposition Table Lookup
     uint64_t hash = computeHash(state);
     if (tt.find(hash) != tt.end()) {
         const TTEntry& entry = tt[hash];
@@ -75,6 +82,7 @@ if ((++node_count & 1023) == 0) {
         }
     }
 
+    // Base Cases: Reached max depth or Game Over
     if (depth == 0 || GameRules::gameOver(state)) {
         return Evaluate::evaluate_state(state, original_player_is_p1);
     }
@@ -84,11 +92,14 @@ if ((++node_count & 1023) == 0) {
         return Evaluate::evaluate_state(state, original_player_is_p1);
     }
 
-    // --- MOVE ORDERING (Lazy) ---
+    // --- MOVE ORDERING ---
+    // We want to try the best moves first to maximize Alpha-Beta pruning.
     std::pair<int, Color> best_move_tt = {-1, red};
     if (tt.count(hash)) best_move_tt = tt[hash].best_move;
 
-    // Helper lambda for priority (Fast lookup, no playMove!)
+    // Assign priority to moves.
+    // 1. TT Move (Best from previous search) -> Highest Priority
+    // 2. Killer Moves (Moves that caused cutoffs recently) -> High Priority
     auto getPriority = [&](const std::pair<int, Color>& m) {
         if (m.first == best_move_tt.first && m.second == best_move_tt.second) return 10000000;
         if (m == killer_moves[depth][0]) return 90000;
@@ -96,7 +107,7 @@ if ((++node_count & 1023) == 0) {
         return 0;
     };
 
-    // Sort moves: Best priority first
+    // Sort the moves based on priority.
     std::sort(moves.begin(), moves.end(), [&](const std::pair<int, Color>& a, const std::pair<int, Color>& b) {
         return getPriority(a) > getPriority(b);
     });
@@ -126,9 +137,9 @@ if ((++node_count & 1023) == 0) {
         }
         
         if (beta <= alpha) {
-            // Beta Cutoff (Pruning)
+            // Beta Cutoff: This branch is too good for the opponent, they won't let us get here.
             if (!time_out) {
-                // Update Killer Moves
+                // Store this move as a Killer Move for this depth.
                 if (move != killer_moves[depth][0]) {
                     killer_moves[depth][1] = killer_moves[depth][0];
                     killer_moves[depth][0] = move;
@@ -138,6 +149,7 @@ if ((++node_count & 1023) == 0) {
         }
     }
 
+    // Store result in Transposition Table
     if (!time_out) {
         TTEntry entry;
         entry.depth = depth;
@@ -147,7 +159,7 @@ if ((++node_count & 1023) == 0) {
         else if (value >= beta) entry.flag = 1;
         else entry.flag = 0;
         
-        // Replacement Strategy: Only overwrite if the new entry is from a deeper (or equal) search
+        // Replacement Strategy: Only overwrite if the new search is deeper or equal.
         auto it = tt.find(hash);
         if (it == tt.end() || depth >= it->second.depth) {
             tt[hash] = entry;
@@ -163,15 +175,16 @@ time_out = false;
 node_count = 0;  // Reset node counter for new search
 tt.clear();
     
-    // Reset Heuristics for new search
+    // Reset Killer Moves for the new search.
     for(auto& d : killer_moves) { d[0] = {-1, red}; d[1] = {-1, red}; }
     
     std::pair<int, Color> best_move = {-1, red};
-    int best_val = -999999; // Store value for Aspiration Windows
 
     auto moves = GameRules::getPossibleMoves(state);
     if (!moves.empty()) best_move = moves[0];
 
+    // Iterative Deepening Loop
+    // Start at depth 1 and go deeper until time runs out.
     for (int d = 1; d <= 30; ++d) {
         int val = _minmax(state, d, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), true, state.player_playing);
         
@@ -180,8 +193,8 @@ tt.clear();
         uint64_t hash = computeHash(state);
         if (tt.count(hash)) {
             best_move = tt[hash].best_move;
-            best_val = val;
-            if (val > 90000 || val < -90000) break; // Updated threshold for new score scaling
+            // If we found a winning mate score, we can stop early.
+            if (val > 90000 || val < -90000) break;
         }
     }
 

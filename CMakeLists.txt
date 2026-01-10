@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.20)
 project(AIGame_2025_Abdelbaki_Lang)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -18,18 +18,11 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         include/Color.h
         include/State.h
         include/EvaluationLogic/Evaluate.h
-        include/EvaluationLogic/MinMax.h
         include/GameRules.h
         src/GameRules.cpp
-        src/EvaluationLogic/MinMax.cpp
         src/EvaluationLogic/Evaluate.cpp
-        src/MCTS.cpp
-        include/MCTS.h
-        include/Bot.h
-        src/Bot.cpp
         src/BotIDDFS.cpp
         src/EvaluationLogic/MinMaxIDDFS.cpp
-        src/EvaluationLogic/MinMaxIDDFS_Old.cpp
 
 )
 

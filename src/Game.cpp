@@ -4,11 +4,7 @@
 
 #include "Game.h"
 #include "GameRules.h"
-#include "EvaluationLogic/MinMax.h"
-#include "MCTS.h"
-#include "Bot.h"
 #include "BotIDDFS.h"
-#include "BotIDDFS_Old.h"
 #include <iostream>
 #include <chrono>
 #include <iomanip>
@@ -351,10 +347,8 @@ void Game::runStrategyBattle() {
 }
 
 void Game::runCompetition() {
-    // Use our Champion Bot
-    BotIDDFS bot(1950);
-    
-    // Ensure output is sent immediately (no buffering)
+    // Initialize our Bot with a time limit of 1900ms (safe buffer for 2s limit).
+    BotIDDFS bot(1900);
     std::cout.setf(std::ios::unitbuf);
 
     std::string token;
@@ -362,14 +356,18 @@ void Game::runCompetition() {
 
     while (true) {
         // --- START PONDERING ---
+        // While we wait for the opponent to play, we use the CPU to think ahead.
+        // We run the search on the current state (where it is the opponent's turn).
+        // This fills the Transposition Table with evaluations of the opponent's possible moves.
         stop_pondering = false;
         bot.setStopFlag(&stop_pondering);
         bot.setTimeLimit(1000000); // Infinite time for pondering
         
         std::thread ponderThread([&]() {
-            bot.getMove(currentState); // Ponder on current state
+            bot.getMove(currentState); // Start search in background
         });
 
+        // Block and wait for input from the arbiter
         if (!(std::cin >> token)) {
             stop_pondering = true;
             ponderThread.join();
@@ -377,17 +375,20 @@ void Game::runCompetition() {
         }
 
         // --- STOP PONDERING ---
+        // Input received! Stop the background search immediately.
         stop_pondering = true;
         ponderThread.join();
         
+        // Reset bot settings for the actual search
         bot.setStopFlag(nullptr);
         bot.setTimeLimit(2850);
 
         if (token == "START") {
-
+            // We are Player 1 and we start.
             
             auto move = bot.getMove(currentState);
             
+            // Convert move to string format (R, B, TR, TB)
             std::string colorStr;
             switch(move.second) {
                 case red: colorStr = "R"; break;
@@ -400,6 +401,7 @@ void Game::runCompetition() {
             currentState = GameRules::playMove(currentState, move.first, move.second);
             
         } else if (token.find("RESULT") != std::string::npos) {
+            // Game Over signal
             break;
         } else {
 
@@ -413,12 +415,12 @@ void Game::runCompetition() {
             else if (colorStr == "TR") colorVal = transparentRED;
             else if (colorStr == "TB") colorVal = transparentBLUE;
             
-            // Apply opponent's move
+            // Apply opponent's move to our internal state
             currentState = GameRules::playMove(currentState, field - 1, colorVal);
             
             if (GameRules::gameOver(currentState)) break;
             
-            // Calculate and play our move
+            // Calculate our best move
             auto move = bot.getMove(currentState);
             std::string myColorStr;
             switch(move.second) {
