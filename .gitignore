@@ -21,3 +21,14 @@ Makefile
 
 *.log
 *.tmp
+referee/*.iml
+referee/.idea/*.xml
+referee/out/production/referee/.idea/*.xml
+referee/out/production/referee/*.iml
+referee/.idea/.gitignore
+referee/out/production/referee/.idea/.gitignore
+.gitignore
+.gitignore
+referee/out/production/referee/Arbitre.class
+.gitignore
+referee/out/production/referee/Arbitre$Joueur.class

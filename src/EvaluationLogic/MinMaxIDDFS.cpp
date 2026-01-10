@@ -53,11 +53,10 @@ uint64_t MinMaxIDDFS::computeHash(const State& state) {
 }
 
 int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, bool maximizing_player, bool original_player_is_p1) {
-    if (time_out) return 0;
+if (time_out) return 0;
     
-    static int node_count = 0;
-    // Check time more frequently (every 1024 nodes instead of 2048) to avoid overshooting
-    if ((++node_count & 1023) == 0) {
+// Check time more frequently (every 1024 nodes instead of 2048) to avoid overshooting
+if ((++node_count & 1023) == 0) {
         auto now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() >= time_limit_ms) {
             time_out = true;
@@ -159,9 +158,10 @@ int MinMaxIDDFS::_minmax(const State &state, int depth, int alpha, int beta, boo
 }
 
 std::pair<int, Color> MinMaxIDDFS::find_best_move(const State &state) {
-    start_time = std::chrono::steady_clock::now();
-    time_out = false;
-     tt.clear();
+start_time = std::chrono::steady_clock::now();
+time_out = false;
+node_count = 0;  // Reset node counter for new search
+tt.clear();
     
     // Reset Heuristics for new search
     for(auto& d : killer_moves) { d[0] = {-1, red}; d[1] = {-1, red}; }

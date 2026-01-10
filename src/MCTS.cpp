@@ -10,6 +10,7 @@
 #include <cmath>
 #include <limits>
 #include <algorithm>
+#include <string>
 #include "GameRules.h"
 
 using namespace std;

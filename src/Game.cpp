@@ -16,6 +16,7 @@
 #include <memory>
 #include <thread>
 #include <atomic>
+#include <string>
 
 void Game::run() {
     // Choose mode
@@ -31,15 +32,7 @@ void Game::run() {
     Bot* bot2 = nullptr;
 
     int limit = 0;
-
-    /*
-    * depth = 2 yielded okay results in testing (Game over! P1: 42 P2: 48)
-    * depth = 3 yielded bad results in testing (infinite loop)
-    * depth = 4 yielded good results in testing (Game over! P1: 43 P2: 47)
-    * depth = 5 yielded bad results in testing (infinite loop)
-    * depth = 6 yielded good results in testing (Game over! P1: 48 P2: 39)
-    */
-
+    
 	if (mode == PVE || mode == EVE) {
         bot2 = new Bot(4);
     }
@@ -402,7 +395,7 @@ void Game::runCompetition() {
                 case transparentRED: colorStr = "TR"; break;
                 case transparentBLUE: colorStr = "TB"; break;
             }
-            std::cout << (move.first + 1) << " " << colorStr << std::endl;
+            std::cout << (move.first + 1) << colorStr << std::endl;
             
             currentState = GameRules::playMove(currentState, move.first, move.second);
             
@@ -410,9 +403,9 @@ void Game::runCompetition() {
             break;
         } else {
 
-            int field = std::stoi(token);
-            std::string colorStr;
-            std::cin >> colorStr;
+            size_t pos;
+            int field = std::stoi(token, &pos);
+            std::string colorStr = token.substr(pos);
             
             Color colorVal;
             if (colorStr == "R") colorVal = red;
@@ -433,9 +426,123 @@ void Game::runCompetition() {
                 case blue: myColorStr = "B"; break;
                 case transparentRED: myColorStr = "TR"; break;
                 case transparentBLUE: myColorStr = "TB"; break;
-            }
-            std::cout << (move.first + 1) << " " << myColorStr << std::endl;
+            }            std::cout << (move.first + 1) << myColorStr << std::endl;
             currentState = GameRules::playMove(currentState, move.first, move.second);
+            if (gameOver) {
+                /*RESULT coup scoreJ1 scoreJ2
+                RESULT LIMIT scoreJ1 scoreJ2*/
+                /*if(currentState.score_p1 == )*/
+                cout << "RESULT " << (move.first + 1) << myColorStr << " " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+            }
         }
     }
+}
+
+void Game::runCompetitionNoPondering(bool isJoueurA) {
+    BotIDDFS bot(2950);
+    std::cout.setf(std::ios::unitbuf);  // Unbuffered output for immediate send
+
+    std::string token;
+    std::string lastMoveStr;
+
+    while (std::cin >> token) {
+        if (isJoueurA) {
+            // JoueurA
+            if (token != "START") {
+                // Apply opponent's move
+                size_t pos;
+                int field = std::stoi(token, &pos);
+                std::string colorStr = token.substr(pos);
+                
+                Color colorVal;
+                if (colorStr == "R") colorVal = red;
+                else if (colorStr == "B") colorVal = blue;
+                else if (colorStr == "TR") colorVal = transparentRED;
+                else colorVal = transparentBLUE;
+                
+                currentState = GameRules::playMove(currentState, field - 1, colorVal);
+                
+                if (GameRules::gameOver(currentState)) {
+                    if (currentState.moves_played >= 400) {
+                        std::cout << "RESULT LIMIT " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                    } else {
+                        std::cout << "RESULT " << token << " " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                    }
+                    break;
+                }
+            }
+            
+            auto move = bot.getMove(currentState);
+            
+            std::string myColorStr;
+            switch(move.second) {
+                case red: myColorStr = "R"; break;
+                case blue: myColorStr = "B"; break;
+                case transparentRED: myColorStr = "TR"; break;
+                default: myColorStr = "TB"; break;
+            }
+            
+            lastMoveStr = std::to_string(move.first + 1) + myColorStr;
+            std::cout << lastMoveStr << std::endl;
+            currentState = GameRules::playMove(currentState, move.first, move.second);
+            
+            if (GameRules::gameOver(currentState)) {
+                if (currentState.moves_played >= 400) {
+                    std::cout << "RESULT LIMIT " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                } else {
+                    std::cout << "RESULT " << lastMoveStr << " " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                }
+                break;
+            }
+        } else {
+            // JoueurB
+            // Apply opponent's move
+            size_t pos;
+            int field = std::stoi(token, &pos);
+            std::string colorStr = token.substr(pos);
+            
+            Color colorVal;
+            if (colorStr == "R") colorVal = red;
+            else if (colorStr == "B") colorVal = blue;
+            else if (colorStr == "TR") colorVal = transparentRED;
+            else colorVal = transparentBLUE;
+            
+            currentState = GameRules::playMove(currentState, field - 1, colorVal);
+            
+            if (GameRules::gameOver(currentState)) {
+                if (currentState.moves_played >= 400) {
+                    std::cout << "RESULT LIMIT " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                } else {
+                    std::cout << "RESULT " << token << " " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                }
+                break;
+            }
+            
+            auto move = bot.getMove(currentState);
+            
+            std::string myColorStr;
+            switch(move.second) {
+                case red: myColorStr = "R"; break;
+                case blue: myColorStr = "B"; break;
+                case transparentRED: myColorStr = "TR"; break;
+                default: myColorStr = "TB"; break;
+            }
+            
+            lastMoveStr = std::to_string(move.first + 1) + myColorStr;
+            std::cout << lastMoveStr << std::endl;
+            currentState = GameRules::playMove(currentState, move.first, move.second);
+            
+            if (GameRules::gameOver(currentState)) {
+                if (currentState.moves_played >= 400) {
+                    std::cout << "RESULT LIMIT " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                } else {
+                    std::cout << "RESULT " << lastMoveStr << " " << currentState.score_p1 << " " << currentState.score_p2 << std::endl;
+                }
+                break;
+            }
+        }
+    }
+    
+    // Ensure output is fully flushed
+    std::cout.flush();
 }
