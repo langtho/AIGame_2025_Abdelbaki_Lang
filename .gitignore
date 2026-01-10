@@ -32,3 +32,6 @@ referee/out/production/referee/.idea/.gitignore
 referee/out/production/referee/Arbitre.class
 .gitignore
 referee/out/production/referee/Arbitre$Joueur.class
+referee/Arbitre$Joueur.class
+.gitignore
+referee/Arbitre.class
