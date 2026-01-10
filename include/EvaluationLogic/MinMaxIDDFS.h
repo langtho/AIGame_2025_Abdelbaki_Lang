@@ -21,7 +21,8 @@ private:
     std::chrono::time_point<std::chrono::steady_clock> start_time;
     int time_limit_ms;
     bool time_out;
-    std::atomic<bool>* stop_flag = nullptr; // Pointer to external flag to stop search immediately (for Pondering)
+    int node_count = 0;  // Node counter for timeout checks
+    std::atomic<bool>* stop_flag = nullptr;
 
     // --- Transposition Table ---
     std::unordered_map<uint64_t, TTEntry> tt;

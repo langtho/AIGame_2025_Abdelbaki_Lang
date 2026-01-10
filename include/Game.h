@@ -24,6 +24,8 @@ class Game {
     void runAIBattle();
     void runStrategyBattle();
     void runCompetition();
+    void runCompetitionNoPondering(bool isJoueurA);
+    //void runCompetitionNoPondering();
     void run();
     void setMode(GameMode m) { mode = m; }
 };
