@@ -17,6 +17,66 @@ Before building the project, ensure you have the following installed:
 * `include/`: Header files.
 * `main.cpp`: Application entry point.
 
+## Referee: Arbitre
+
+The repository includes a referee program `Arbitre.java` that launches and manages two player processes, relays moves between them, enforces timeouts, and prints results. The referee communicates with the player executables via standard input/output.
+
+Key behavior:
+
+- Launches two player processes:
+  - `AIGame_2025_Abdelbaki_Lang.exe JoueurA`
+  - `AIGame_2025_Abdelbaki_Lang.exe JoueurB`
+- Alternates turns between players, sending the last move to the current player.
+- Waits up to 3 seconds for a move and disqualifies a player on timeout.
+- Ends the match when a move contains `RESULT` or after 400 moves.
+
+### How to compile the referee
+
+From the `referee` directory:
+
+```powershell
+cd referee
+javac Arbitre.java
+```
+
+This produces `Arbitre.class` in the same directory.
+
+> Note: `Arbitre.java` contains hard-coded paths to the player executable. Adjust them if your build output location differs.
+
+### How to run the referee
+
+From the `referee` directory run:
+
+```powershell
+java Arbitre
+```
+
+The referee will start both player processes and manage the game until termination.
+
+### Notes
+
+- Adjust the path to the player executable in `Arbitre.java` if your build location differs.
+- The referee expects the player executables to communicate via standard input/output.
+- The game ends when a player sends a move containing `RESULT` or after 400 moves.
+# AIGame_2025_Abdelbaki_Lang
+
+This project implements an AI-based game engine using C++14. It utilizes Iterative Deepening Depth-First Search for its bot logic.
+
+## Prerequisites
+
+Before building the project, ensure you have the following installed:
+
+* **CMake**: Version 3.20 or newer.
+* **C++ Compiler**: Must support **C++14** (e.g., GCC, Clang, MSVC).
+* **Make** or another build tool (Ninja, Visual Studio, etc.).
+
+## Project Structure
+
+- `src/`: Source files (Game logic, Bot implementations).
+- `src/Evaluation/`: Evaluation Logic and Metaheuristic
+- `include/`: Header files.
+- `main.cpp`: Application entry point.
+
 ## Build Instructions
 
 It is recommended to build the project in **Release** mode to enable optimizations (like `-O3` and `-march=native`), which are critical for the AI's performance.
