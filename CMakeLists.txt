@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(AIGame_2025_Abdelbaki_Lang)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(include)
@@ -26,19 +30,9 @@ add_executable(AIGame_2025_Abdelbaki_Lang
 
 )
 
-option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
-
-if(ENABLE_ASAN)
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        target_compile_options(${PROJECT_NAME} PRIVATE 
-            -fsanitize=address 
-            -g 
-            -O1 
-            -fno-omit-frame-pointer
-        )        
-        target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
-        message(STATUS "AddressSanitizer enabled for ${PROJECT_NAME}")
-    else()
-        message(WARNING "AddressSanitizer not supported for this compiler")
-    endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    target_compile_options(${PROJECT_NAME} PRIVATE -march=native -pthread)
+    target_link_options(${PROJECT_NAME} PRIVATE -pthread)
 endif()
+
+
