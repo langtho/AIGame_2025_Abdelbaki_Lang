@@ -113,7 +113,7 @@ void Game::runCompetition() {
 }
 
 void Game::runCompetitionNoPondering(bool isJoueurA) {
-    BotIDDFS bot(2950);
+    BotIDDFS bot(2000);
 
     std::string token;
     std::string lastMoveStr;

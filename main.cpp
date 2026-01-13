@@ -12,7 +12,7 @@ int main(int argc, char** argv)
    //game.runStrategyBattle();
    //game.runCompetition();
   
-   if (argv[1] == "JoueurB") {
+   if (argc > 1 && std::string(argv[1]) == "JoueurB") {
        game.runCompetitionNoPondering(false);
    } else {
        game.runCompetitionNoPondering(true);
