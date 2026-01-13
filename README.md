@@ -96,14 +96,16 @@ The referee will start both player processes and manage the game until terminati
 
 After a successful build, the executable will be located in the `build` directory.
 
+[Options]: JoueurA or JoueurB (JoueurA would be the one who starts)
+
 **On Linux / macOS:**
 ```bash
-./AIGame_2025_Abdelbaki_Lang
+./AIGame_2025_Abdelbaki_Lang [Options]
 ```
 
 **On Windows**
 ```bash
-AIGame_2025_Abdelbaki_Lang.exe
+AIGame_2025_Abdelbaki_Lang.exe [Options]
 ```
 
 **IDE Setup**
