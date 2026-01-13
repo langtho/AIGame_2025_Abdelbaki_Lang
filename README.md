@@ -66,13 +66,18 @@ The referee will start both player processes and manage the game until terminati
 
 1.  **Create a build directory:**
     ```bash
-    mkdir build
+    mkdir -p build
     cd build
     ```
     
+2.  **Configure CMake in Release mode:**
+    ```bash
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    ```
+
 3.  **Compile the executable:**
     ```bash
-    cmake --build .
+    cmake --build . --config Release
     ```
 
 ## Running the Process without Arbitre
