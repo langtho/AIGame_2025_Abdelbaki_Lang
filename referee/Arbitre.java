@@ -5,9 +5,9 @@ public class Arbitre {
     private static final int TIMEOUT_SECONDS = 3;
 
     public static void main(String[] args) throws Exception {
-        Process A = Runtime.getRuntime().exec("\"E:\\Studies\\AI Game\\Game\\ne\\AIGame_2025_Abdelbaki_Lang\\out\\build\\x64-Debug\\AIGame_2025_Abdelbaki_Lang.exe\" JoueurA");
-        Process B = Runtime.getRuntime().exec("\"E:\\Studies\\AI Game\\Game\\ne\\AIGame_2025_Abdelbaki_Lang\\out\\build\\x64-Debug\\AIGame_2025_Abdelbaki_Lang.exe\" JoueurB");
-        
+        Process A = Runtime.getRuntime().exec("/home/loko/Documents/UNI/UNI_M1/AI_Game/Test/AIGame_2025_Abdelbaki_Lang/build_linux/AIGame_2025_Abdelbaki_Lang JoueurA");
+        Process B = Runtime.getRuntime().exec("/home/loko/Documents/UNI/UNI_M1/AI_Game/Test/AIGame_2025_Abdelbaki_Lang/build_linux/AIGame_2025_Abdelbaki_Lang JoueurB");
+
         Joueur joueurA = new Joueur("A", A);
         Joueur joueurB = new Joueur("B", B);
 

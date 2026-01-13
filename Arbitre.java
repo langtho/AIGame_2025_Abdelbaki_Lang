@@ -6,7 +6,7 @@ public class Arbitre {
 
     public static void main(String[] args) throws Exception {
         // Pfad zu deinem kompilierten C++ Bot (Release Version)
-        String botCommand = "./cmake-build-release/AIGame_2025_Abdelbaki_Lang";
+        String botCommand = "./build/AIGame_2025_Abdelbaki_Lang";
         
         Process A = Runtime.getRuntime().exec(botCommand);
         Process B = Runtime.getRuntime().exec(botCommand);

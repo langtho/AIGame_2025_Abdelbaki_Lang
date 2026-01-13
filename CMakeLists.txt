@@ -9,9 +9,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 include_directories(include)
 
-
-
-add_executable(AIGame_2025_Abdelbaki_Lang
+add_executable(${PROJECT_NAME}
         main.cpp
         include/Field.h
         include/Board.h
@@ -27,12 +25,11 @@ add_executable(AIGame_2025_Abdelbaki_Lang
         src/EvaluationLogic/Evaluate.cpp
         src/BotIDDFS.cpp
         src/EvaluationLogic/MinMaxIDDFS.cpp
-
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    target_compile_options(${PROJECT_NAME} PRIVATE -march=native -pthread)
-    target_link_options(${PROJECT_NAME} PRIVATE -pthread)
+
+    target_compile_options(${PROJECT_NAME} PRIVATE -O3 -pthread)
+    
+    target_link_options(${PROJECT_NAME} PRIVATE -pthread -static-libgcc -static-libstdc++)
 endif()
-
-
