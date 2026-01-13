@@ -13,7 +13,6 @@ Makefile
 *.so
 *.dll
 *.dylib
-*.exe
 *.out
 *.a
 *.lib
