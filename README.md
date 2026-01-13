@@ -28,7 +28,19 @@ Key behavior:
   - `AIGame_2025_Abdelbaki_Lang.exe JoueurB`
 - Alternates turns between players, sending the last move to the current player.
 - Waits up to 3 seconds for a move and disqualifies a player on timeout.
-- Ends the match when a move contains `RESULT` or after 400 moves.
+Ends the match when a move contains `RESULT` or after 400 moves.
+
+### How to add our Player to the Arbitre
+#### LINUX
+- Download the Repo
+- Add the Linux excecutable in the following line
+```
+Process A = Runtime.getRuntime().exec("here the absolute path JoueurA");
+```
+ou
+```
+Process B = Runtime.getRuntime().exec("here the absolute path JoueurB");
+```
 
 ### How to compile the referee
 
