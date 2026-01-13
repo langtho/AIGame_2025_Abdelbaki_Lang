@@ -58,28 +58,11 @@ The referee will start both player processes and manage the game until terminati
 - Adjust the path to the player executable in `Arbitre.java` if your build location differs.
 - The referee expects the player executables to communicate via standard input/output.
 - The game ends when a player sends a move containing `RESULT` or after 400 moves.
-# AIGame_2025_Abdelbaki_Lang
 
-This project implements an AI-based game engine using C++14. It utilizes Iterative Deepening Depth-First Search for its bot logic.
 
-## Prerequisites
-
-Before building the project, ensure you have the following installed:
-
-* **CMake**: Version 3.20 or newer.
-* **C++ Compiler**: Must support **C++14** (e.g., GCC, Clang, MSVC).
-* **Make** or another build tool (Ninja, Visual Studio, etc.).
-
-## Project Structure
-
-- `src/`: Source files (Game logic, Bot implementations).
-- `src/Evaluation/`: Evaluation Logic and Metaheuristic
-- `include/`: Header files.
-- `main.cpp`: Application entry point.
+# How to compile the Code
 
 ## Build Instructions
-
-It is recommended to build the project in **Release** mode to enable optimizations (like `-O3` and `-march=native`), which are critical for the AI's performance.
 
 1.  **Create a build directory:**
     ```bash
@@ -92,7 +75,7 @@ It is recommended to build the project in **Release** mode to enable optimizatio
     cmake --build .
     ```
 
-## Running the Game
+## Running the Process without Arbitre
 
 After a successful build, the executable will be located in the `build` directory.
 
