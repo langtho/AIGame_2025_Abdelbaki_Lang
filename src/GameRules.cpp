@@ -9,23 +9,31 @@ State GameRules::playMove(const State& state,int field, Color color) {
     int seeds=0;
     int transparent_seeds=0;
     int score=0;
-    State newState=State(state);
-    newState.moves_played++;
-    if (color==red || color==transparentRED)distributing_in_all_holes=true;
-    if (field>=16||field<0) {
-        cerr<<"ERROR";
-    }
-    seeds=newState.board.fields[field].take_seeds(color,transparent_seeds);
+    State newState = State(state);
 
-    if (seeds==0 && transparent_seeds==0) {
-        cerr<<"Your play isn't valid: No seed in the demanded color"<<endl;
+    // Validate field index
+    if (field < 0 || field >= 16) {
+        cerr << "ERROR: Invalid field index " << field << endl;
+        return newState;
     }
+
+    // Reject moves that don't have any seed of the selected color in the source hole
+    if (!newState.board.fields[field].verify_Seed(color)) {
+        cerr << "ERROR: No seed of requested color at hole " << (field + 1) << endl;
+        return newState;
+    }
+
+    newState.moves_played++;
+    if (color == red || color == transparentRED) distributing_in_all_holes = true;
+
+    seeds = newState.board.fields[field].take_seeds(color, transparent_seeds);
     if (field==15) {
         field=0;
     }else {
         field++;
     }
 
+    int last_hole = field;
 
     while (seeds!=0 ||transparent_seeds!=0) {
 
@@ -39,6 +47,7 @@ State GameRules::playMove(const State& state,int field, Color color) {
             seeds--;
         }
 
+        last_hole = field;
         if (distributing_in_all_holes) {
             if (field!=15) {
                 field++;
@@ -55,7 +64,8 @@ State GameRules::playMove(const State& state,int field, Color color) {
             }
         }
     }
-    score=capture(newState,field);
+    //use last_hole instead of field (which points to the next empty slot)
+    score=capture(newState,last_hole);
     if (newState.player_playing) {
         newState.score_p1+=score;
     }else {
